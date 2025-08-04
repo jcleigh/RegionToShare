@@ -2,7 +2,6 @@
         xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
         xmlns:styles="urn:TomsToolbox.Wpf.Styles"
-        xmlns:properties="clr-namespace:RegionToShare.Properties"
         Title="Region to Share"
         Height="782" Width="1024"
         MinHeight="200" MinWidth="300"
@@ -47,21 +46,21 @@
                   ItemsSource="{Binding Resolutions}"
                   Width="90" IsEditable="True" />
         <Decorator Style="{StaticResource Padding}"/>
-        <TextBox Text="{Binding ThemeColor, Source={x:Static properties:Settings.Default}, UpdateSourceTrigger=PropertyChanged}"
+        <TextBox Text="{Binding Settings.ThemeColor, UpdateSourceTrigger=PropertyChanged}"
                  Width="90" />
         <Decorator Style="{StaticResource Padding}"/>
-        <ComboBox SelectedItem="{Binding FramesPerSecond, Source={x:Static properties:Settings.Default}}"
+        <ComboBox SelectedItem="{Binding Settings.FramesPerSecond}"
                   ItemStringFormat="{}{0} FPS"
                   ItemsSource="{Binding SupportedFramesPerSecond}"
                   Width="65" />
         <Decorator Style="{StaticResource Padding}"/>
         <CheckBox Content="Draw shadow cursor"
                   VerticalAlignment="Center"
-                  IsChecked="{Binding DrawShadowCursor, Source={x:Static properties:Settings.Default}}" />
+                  IsChecked="{Binding Settings.DrawShadowCursor}" />
         <Decorator Style="{StaticResource Padding}"/>
         <CheckBox Content="Start activated"
                   VerticalAlignment="Center"
-                  IsChecked="{Binding StartActivated, Source={x:Static properties:Settings.Default}}" />
+                  IsChecked="{Binding Settings.StartActivated}" />
       </StackPanel>
       <TextBlock Text="{Binding Version}" VerticalAlignment="Bottom" HorizontalAlignment="Right" Padding="5,2" />
       <Grid VerticalAlignment="Center" HorizontalAlignment="Center">

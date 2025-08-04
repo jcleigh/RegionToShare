@@ -207,7 +207,7 @@ public partial class RecordingWindow
 
         try
         {
-            Dispatcher.BeginInvoke(Timer_Tick);
+            System.Windows.Threading.DispatcherExtensions.BeginInvoke(Dispatcher, Timer_Tick);
         }
         catch
         {

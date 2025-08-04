@@ -1,5 +1,4 @@
 ﻿using System.ComponentModel;
-using System.Configuration;
 using System.Globalization;
 using System.IO;
 using System.Reflection;
@@ -8,7 +7,7 @@ using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Threading;
-using RegionToShare.Properties;
+using RegionToShare.Configuration;
 using Throttle;
 using TomsToolbox.Essentials;
 using TomsToolbox.Wpf;
@@ -26,9 +25,12 @@ public partial class MainWindow
     private RecordingWindow? _recordingWindow;
 
     private POINT _debugOffset;
+    private readonly ConfigurationService _configurationService;
 
-    public MainWindow()
+    public MainWindow(ConfigurationService? configurationService = null)
     {
+        _configurationService = configurationService ?? new ConfigurationService();
+        
         InitializeComponent();
 
         DataContext = this;
@@ -38,13 +40,13 @@ public partial class MainWindow
         Settings.PropertyChanged += Settings_PropertyChanged;
     }
 
-    public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+    public string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "1.0.0";
 
     public ICollection<string> Resolutions { get; }
 
     public static ICollection<int> SupportedFramesPerSecond { get; } = new[] { 5, 10, 15, 20, 30, 60 };
 
-    internal Settings Settings => Settings.Default;
+    internal AppSettings Settings => _configurationService.Settings;
 
     public string? Extend
     {
@@ -180,7 +182,7 @@ public partial class MainWindow
 
         var timer = new DispatcherTimer(DispatcherPriority.ApplicationIdle, Dispatcher.CurrentDispatcher);
 
-        void TimerTick(object sender, EventArgs e)
+        void TimerTick(object? sender, EventArgs e)
         {
             if (_recordingWindow != null)
             {
@@ -210,7 +212,7 @@ public partial class MainWindow
         InfoArea.Visibility = Visibility.Collapsed;
         RenderTarget.Visibility = Visibility.Visible;
 
-        ValidateSettings();
+        ValidateCurrentSettings();
 
         _recordingWindow = new RecordingWindow(RenderTarget, Settings.DrawShadowCursor, Settings.FramesPerSecond, _debugOffset);
 
@@ -245,36 +247,35 @@ public partial class MainWindow
     {
         try
         {
-            var settings = Settings.Default;
-
-            settings.FramesPerSecond = SupportedFramesPerSecond.Contains(settings.FramesPerSecond) ? settings.FramesPerSecond : 15;
-
-            try
-            {
-                ColorConverter.ConvertFromString(settings.ThemeColor);
-            }
-            catch
-            {
-                settings.ThemeColor = nameof(Colors.SteelBlue);
-            }
-
+            // Basic validation - could be expanded for specific config file checks
             return true;
         }
-        catch (ConfigurationException ex)
+        catch (Exception ex)
         {
-            var inner = ex.ExceptionChain().OfType<ConfigurationException>().FirstOrDefault(item => !item.Filename.IsNullOrEmpty());
-            if (inner == null)
-                throw;
-
-            var message = $"The settings file '{inner.Filename}' is corrupt. It will be reset to default values.";
+            var message = $"Configuration error: {ex.Message}. Default settings will be used.";
             MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.ServiceNotification);
-            File.Delete(inner.Filename);
         }
 
         return false;
     }
 
-    private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void ValidateCurrentSettings()
+    {
+        var settings = Settings;
+
+        settings.FramesPerSecond = SupportedFramesPerSecond.Contains(settings.FramesPerSecond) ? settings.FramesPerSecond : 15;
+
+        try
+        {
+            ColorConverter.ConvertFromString(settings.ThemeColor);
+        }
+        catch
+        {
+            settings.ThemeColor = nameof(Colors.SteelBlue);
+        }
+    }
+
+    private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Settings.ThemeColor))
         {
@@ -319,7 +320,7 @@ public partial class MainWindow
 
         var normalPosition = _windowHandle.GetWindowPlacement().NormalPosition - GlassFrameThickness;
         Settings.WindowPlacement = normalPosition.Serialize();
-        Settings.Save();
+        _configurationService.SaveSettings();
     }
 
     [Throttled(typeof(DispatcherThrottle), (int)DispatcherPriority.Normal)]
