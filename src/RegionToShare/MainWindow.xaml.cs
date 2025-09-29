@@ -15,6 +15,13 @@ using TomsToolbox.Wpf;
 using TomsToolbox.Wpf.Styles;
 using static RegionToShare.NativeMethods;
 using static RegionToShare.ExtensionMethods;
+using WpfApplication = System.Windows.Application;
+using WpfMessageBox = System.Windows.MessageBox;
+using WpfMessageBoxOptions = System.Windows.MessageBoxOptions;
+using WpfBinding = System.Windows.Data.Binding;
+using WpfColorConverter = System.Windows.Media.ColorConverter;
+using WpfColor = System.Windows.Media.Color;
+using WpfSize = System.Windows.Size;
 
 namespace RegionToShare;
 
@@ -38,7 +45,7 @@ public partial class MainWindow
         Settings.PropertyChanged += Settings_PropertyChanged;
     }
 
-    public string Version => Assembly.GetExecutingAssembly().GetName().Version.ToString();
+    public string Version => Assembly.GetExecutingAssembly().GetName().Version?.ToString() ?? "0.0.0.0";
 
     public ICollection<string> Resolutions { get; }
 
@@ -55,13 +62,13 @@ public partial class MainWindow
         new FrameworkPropertyMetadata(default(string), FrameworkPropertyMetadataOptions.BindsTwoWayByDefault,
             (d, args) => ((MainWindow)d).OnExtendChanged(args.NewValue as string)));
 
-    public Brush BackgroundPattern
+    public System.Windows.Media.Brush BackgroundPattern
     {
-        get => (Brush)GetValue(BackgroundPatternProperty);
+        get => (System.Windows.Media.Brush)GetValue(BackgroundPatternProperty);
         set => SetValue(BackgroundPatternProperty, value);
     }
     public static readonly DependencyProperty BackgroundPatternProperty = DependencyProperty.Register(
-        nameof(BackgroundPattern), typeof(Brush), typeof(MainWindow), new PropertyMetadata(default(Brush)));
+        nameof(BackgroundPattern), typeof(System.Windows.Media.Brush), typeof(MainWindow), new PropertyMetadata(default(System.Windows.Media.Brush)));
 
     private void OnExtendChanged(string? newValue)
     {
@@ -138,7 +145,7 @@ public partial class MainWindow
         };
 
         separationLayerWindow.MouseDown += SubLayer_MouseDown;
-        BindingOperations.SetBinding(separationLayerWindow, BackgroundProperty, new Binding(nameof(BackgroundPattern)) { Source = this });
+        BindingOperations.SetBinding(separationLayerWindow, BackgroundProperty, new WpfBinding(nameof(BackgroundPattern)) { Source = this });
 
         separationLayerWindow.SourceInitialized += (_, _) =>
         {
@@ -180,7 +187,7 @@ public partial class MainWindow
 
         var timer = new DispatcherTimer(DispatcherPriority.ApplicationIdle, Dispatcher.CurrentDispatcher);
 
-        void TimerTick(object sender, EventArgs e)
+        void TimerTick(object? sender, EventArgs e)
         {
             if (_recordingWindow != null)
             {
@@ -251,7 +258,7 @@ public partial class MainWindow
 
             try
             {
-                ColorConverter.ConvertFromString(settings.ThemeColor);
+                WpfColorConverter.ConvertFromString(settings.ThemeColor);
             }
             catch
             {
@@ -267,14 +274,14 @@ public partial class MainWindow
                 throw;
 
             var message = $"The settings file '{inner.Filename}' is corrupt. It will be reset to default values.";
-            MessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, MessageBoxOptions.ServiceNotification);
+            WpfMessageBox.Show(message, "Error", MessageBoxButton.OK, MessageBoxImage.Error, MessageBoxResult.OK, WpfMessageBoxOptions.ServiceNotification);
             File.Delete(inner.Filename);
         }
 
         return false;
     }
 
-    private void Settings_PropertyChanged(object sender, PropertyChangedEventArgs e)
+    private void Settings_PropertyChanged(object? sender, PropertyChangedEventArgs e)
     {
         if (e.PropertyName == nameof(Settings.ThemeColor))
         {
@@ -286,8 +293,8 @@ public partial class MainWindow
     {
         try
         {
-            var themeColor = (Color)ColorConverter.ConvertFromString(Settings.ThemeColor);
-            Application.Current.Resources["ThemeColor"] = themeColor;
+            var themeColor = (WpfColor)WpfColorConverter.ConvertFromString(Settings.ThemeColor);
+            WpfApplication.Current.Resources["ThemeColor"] = themeColor;
             BackgroundPattern = GenerateRandomBrush(themeColor);
         }
         catch
@@ -365,7 +372,7 @@ public partial class MainWindow
 
     private bool TryParseSize(string value, out SIZE size)
     {
-        size = Size.Empty;
+        size = WpfSize.Empty;
 
         try
         {

@@ -2,10 +2,13 @@
 
   <PropertyGroup>
     <OutputType>WinExe</OutputType>
-    <TargetFramework>net462</TargetFramework>
+    <TargetFramework>net9.0-windows</TargetFramework>
     <Nullable>enable</Nullable>
     <UseWPF>true</UseWPF>
-    <LangVersion>10.0</LangVersion>
+    <UseWindowsForms>true</UseWindowsForms>
+    <LangVersion>12.0</LangVersion>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <ApplicationHighDpiMode>PerMonitorV2</ApplicationHighDpiMode>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <ImplicitUsings>enable</ImplicitUsings>
@@ -20,14 +23,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Fody" Version="6.9.1" PrivateAssets="all" />
+    <PackageReference Include="Fody" Version="6.9.3" PrivateAssets="all" />
     <PackageReference Include="Throttle.Fody" Version="1.7.0" PrivateAssets="all" />
-    <PackageReference Include="TomsToolbox.Wpf.Styles" Version="2.21.0" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <Reference Include="System.Windows.Forms" />
-    <Reference Include="WindowsFormsIntegration" />
+    <PackageReference Include="TomsToolbox.Wpf.Styles" Version="2.22.2" />
   </ItemGroup>
 
   <ItemGroup>
