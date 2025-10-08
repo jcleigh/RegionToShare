@@ -232,49 +232,13 @@ public partial class RecordingWindow
                 graphics.DrawCursor(nativeRect);
             }
 
-            // Lock the bitmap data to copy it to a WriteableBitmap
-            var bitmapData = bitmap.LockBits(
-                new Rectangle(0, 0, bitmap.Width, bitmap.Height),
-                ImageLockMode.ReadOnly,
-                PixelFormat.Format32bppArgb);
+            var bitmapHandle = bitmap.GetHbitmap();
+            var imageSource = Imaging.CreateBitmapSourceFromHBitmap(bitmapHandle, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            imageSource.Freeze();
 
-            try
-            {
-                var writeableBitmap = new WriteableBitmap(
-                    bitmap.Width,
-                    bitmap.Height,
-                    96, // dpiX
-                    96, // dpiY
-                    System.Windows.Media.PixelFormats.Bgra32,
-                    null);
+            DeleteObject(bitmapHandle);
 
-                writeableBitmap.Lock();
-                try
-                {
-                    // Copy the bitmap data
-                    unsafe
-                    {
-                        Buffer.MemoryCopy(
-                            bitmapData.Scan0.ToPointer(),
-                            writeableBitmap.BackBuffer.ToPointer(),
-                            writeableBitmap.BackBufferStride * writeableBitmap.PixelHeight,
-                            bitmapData.Stride * bitmapData.Height);
-                    }
-
-                    writeableBitmap.AddDirtyRect(new Int32Rect(0, 0, bitmap.Width, bitmap.Height));
-                }
-                finally
-                {
-                    writeableBitmap.Unlock();
-                }
-
-                writeableBitmap.Freeze();
-                _renderTarget.Source = writeableBitmap;
-            }
-            finally
-            {
-                bitmap.UnlockBits(bitmapData);
-            }
+            _renderTarget.Source = imageSource;
         }
         catch
         {

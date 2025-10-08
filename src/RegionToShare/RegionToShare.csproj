@@ -8,7 +8,6 @@
     <UseWindowsForms>true</UseWindowsForms>
     <LangVersion>12.0</LangVersion>
     <EnableWindowsTargeting>true</EnableWindowsTargeting>
-    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <DebugSymbols>true</DebugSymbols>
     <DebugType>embedded</DebugType>
     <ImplicitUsings>enable</ImplicitUsings>
