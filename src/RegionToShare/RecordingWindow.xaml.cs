@@ -234,6 +234,7 @@ public partial class RecordingWindow
 
             var bitmapHandle = bitmap.GetHbitmap();
             var imageSource = Imaging.CreateBitmapSourceFromHBitmap(bitmapHandle, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            imageSource.Freeze();
 
             DeleteObject(bitmapHandle);
 
