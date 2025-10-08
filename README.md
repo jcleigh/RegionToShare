@@ -14,7 +14,7 @@ It's up to your meeting app whether it properly shares this hidden windows conte
 ## Prerequisites
 
 - Windows 10 or 11
-- DotNet 4.6.2 or newer
+- .NET 9 or newer
 
 ## Installation
 

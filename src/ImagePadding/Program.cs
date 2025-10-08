@@ -11,12 +11,17 @@ using var targetImage = new Image<Rgba32>(targetSize, targetSize);
 var xOffset = (targetImage.Width - sourceImage.Width) / 2;
 var yOffset = (targetImage.Height - sourceImage.Height) / 2;
 
-for (var y = 0; y < sourceImage.Height; y++)
+// Use the modern ImageSharp API
+sourceImage.ProcessPixelRows(targetImage, (sourceAccessor, targetAccessor) =>
 {
-    var sourceRow = sourceImage.GetPixelRowSpan(y);
-    var targetRow = targetImage.GetPixelRowSpan(y + yOffset);
-
-    for (var x = 0; x < sourceImage.Width; x++) targetRow[x + xOffset] = sourceRow[x];
-}
+    for (var y = 0; y < sourceImage.Height; y++)
+    {
+        var sourceRow = sourceAccessor.GetRowSpan(y);
+        var targetRow = targetAccessor.GetRowSpan(y + yOffset);
+        
+        for (var x = 0; x < sourceImage.Width; x++) 
+            targetRow[x + xOffset] = sourceRow[x];
+    }
+});
 
 targetImage.SaveAsPng(targetName);

@@ -10,6 +10,7 @@ using TomsToolbox.Wpf;
 using static RegionToShare.NativeMethods;
 using Image = System.Windows.Controls.Image;
 using Size = System.Drawing.Size;
+using WpfButtonBase = System.Windows.Controls.Primitives.ButtonBase;
 
 namespace RegionToShare;
 
@@ -66,7 +67,7 @@ public partial class RecordingWindow
 
         NativeWindowRect = rect;
 
-        this.BeginInvoke(OnSizeOrPositionChanged);
+        Dispatcher.BeginInvoke(OnSizeOrPositionChanged);
 
         base.OnSourceInitialized(e);
     }
@@ -97,7 +98,7 @@ public partial class RecordingWindow
 
         if (e.Property == WindowStateProperty)
         {
-            this.BeginInvoke(DispatcherPriority.Background, () =>
+            Dispatcher.BeginInvoke(DispatcherPriority.Background, () =>
             {
                 WindowState = WindowState.Normal;
                 OnSizeOrPositionChanged();
@@ -112,7 +113,7 @@ public partial class RecordingWindow
             && e.Property != ActualHeightProperty)
             return;
 
-        this.BeginInvoke(DispatcherPriority.Background, OnSizeOrPositionChanged);
+        Dispatcher.BeginInvoke(DispatcherPriority.Background, OnSizeOrPositionChanged);
     }
 
     protected override void OnClosed(EventArgs e)
@@ -166,7 +167,7 @@ public partial class RecordingWindow
 
         if (InputHitTest(clientPoint) is FrameworkElement element)
         {
-            if (element.AncestorsAndSelf().OfType<ButtonBase>().Any())
+            if (element.AncestorsAndSelf().OfType<WpfButtonBase>().Any())
             {
                 return HitTest.Client;
             }
@@ -207,7 +208,7 @@ public partial class RecordingWindow
 
         try
         {
-            Dispatcher.BeginInvoke(Timer_Tick);
+            System.Windows.Threading.Dispatcher.CurrentDispatcher.BeginInvoke((Action)Timer_Tick);
         }
         catch
         {
@@ -233,6 +234,7 @@ public partial class RecordingWindow
 
             var bitmapHandle = bitmap.GetHbitmap();
             var imageSource = Imaging.CreateBitmapSourceFromHBitmap(bitmapHandle, IntPtr.Zero, Int32Rect.Empty, BitmapSizeOptions.FromEmptyOptions());
+            imageSource.Freeze();
 
             DeleteObject(bitmapHandle);
 
